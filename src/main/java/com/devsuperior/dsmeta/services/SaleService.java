@@ -3,9 +3,11 @@ package com.devsuperior.dsmeta.services;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 import com.devsuperior.dsmeta.dto.SaleReportDTO;
+import com.devsuperior.dsmeta.dto.SaleSummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,25 +33,43 @@ public class SaleService {
 											String maxDateString,
 											String name,
 											Pageable pageable) {
-
 		LocalDate minDate = null;
 		LocalDate maxDate = null;
 
+		minDate = stringDateToLocalDateMin(minDateString);
+		maxDate = stringDateToLocalDateMax(maxDateString);
+
+		return repository.searchReport(minDate, maxDate, name, pageable);
+    }
+
+
+	public List<SaleSummaryDTO> searchSummary(String minDateString, String maxDateString) {
+		LocalDate minDate = null;
+		LocalDate maxDate = null;
+
+		minDate = stringDateToLocalDateMin(minDateString);
+		maxDate = stringDateToLocalDateMax(maxDateString);
+
+
+		return repository.searchSummary(minDate, maxDate);
+	}
+
+	private LocalDate stringDateToLocalDateMin(String minDateString){
 		if(minDateString == null || minDateString.isEmpty()) {
 			LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
-			minDate = today.minusYears(1L);
+            return today.minusYears(1L);
 		}else{
-			minDate = LocalDate.parse(minDateString);
+			return LocalDate.parse(minDateString);
 		}
+	}
 
+	private LocalDate stringDateToLocalDateMax(String maxDateString){
 		if(maxDateString == null || maxDateString.isEmpty()){
-			maxDate = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+			return LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
 		}else{
-			maxDate = LocalDate.parse(maxDateString);
+			return LocalDate.parse(maxDateString);
 		}
+	}
 
-		Page<SaleReportDTO> result = repository.searchReport(minDate, maxDate, name, pageable);
 
-		return result;
-    }
 }
